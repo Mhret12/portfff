@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS Calculator Replica</title>
+    <style>
+        :root {
+            --bg-black: #000000;
+            --btn-gray: #333333;
+            --btn-light-gray: #a5a5a5;
+            --btn-orange: #ff9f0a;
+            --text-white: #ffffff;
+            --text-black: #000000;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+        }
+
+        .calculator {
+            width: 320px;
+            padding: 20px;
+        }
+
+        .display {
+            color: var(--text-white);
+            font-size: 80px;
+            text-align: right;
+            margin-bottom: 10px;
+            font-weight: 300;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            border: none;
+            border-radius: 50%;
+            height: 70px;
+            width: 70px;
+            font-size: 30px;
+            cursor: pointer;
+            transition: brightness 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button:active {
+            filter: brightness(1.5);
+        }
+
+        .btn-dark-gray { background-color: var(--btn-gray); color: var(--text-white); }
+        .btn-light-gray { background-color: var(--btn-light-gray); color: var(--text-black); }
+        .btn-orange { background-color: var(--btn-orange); color: var(--text-white); }
+
+        .btn-zero {
+            grid-column: span 2;
+            width: 152px;
+            border-radius: 40px;
+            justify-content: flex-start;
+            padding-left: 28px;
+        }
+
+        /* Adjust font size for functional buttons */
+        .btn-light-gray { font-size: 24px; font-weight: 500; }
+        .btn-orange { font-size: 36px; }
+    </style>
+</head>
+<body>
+
+<div class="calculator">
+    <div class="display" id="display">0</div>
+    <div class="buttons">
+        <button class="btn-light-gray" onclick="clearDisplay()">AC</button>
+        <button class="btn-light-gray" onclick="toggleSign()">+/-</button>
+        <button class="btn-light-gray" onclick="percentage()">%</button>
+        <button class="btn-orange" onclick="setOperator('/')">÷</button>
+
+        <button class="btn-dark-gray" onclick="appendNumber('7')">7</button>
+        <button class="btn-dark-gray" onclick="appendNumber('8')">8</button>
+        <button class="btn-dark-gray" onclick="appendNumber('9')">9</button>
+        <button class="btn-orange" onclick="setOperator('*')">×</button>
+
+        <button class="btn-dark-gray" onclick="appendNumber('4')">4</button>
+        <button class="btn-dark-gray" onclick="appendNumber('5')">5</button>
+        <button class="btn-dark-gray" onclick="appendNumber('6')">6</button>
+        <button class="btn-orange" onclick="setOperator('-')">-</button>
+
+        <button class="btn-dark-gray" onclick="appendNumber('1')">1</button>
+        <button class="btn-dark-gray" onclick="appendNumber('2')">2</button>
+        <button class="btn-dark-gray" onclick="appendNumber('3')">3</button>
+        <button class="btn-orange" onclick="setOperator('+')">+</button>
+
+        <button class="btn-dark-gray btn-zero" onclick="appendNumber('0')">0</button>
+        <button class="btn-dark-gray" onclick="appendNumber('.')">.</button>
+        <button class="btn-orange" onclick="calculate()">=</button>
+    </div>
+</div>
+
+<script>
+    let currentInput = '0';
+    let previousInput = '';
+    let operator = null;
+    let shouldResetScreen = false;
+
+    const displayElement = document.getElementById('display');
+       function updateDisplay() {
+        // Adjust font size for large numbers
+        if (currentInput.length > 6) {
+            displayElement.style.fontSize = '50px';
+        } else {
+            displayElement.style.fontSize = '80px';
+        }
+        displayElement.innerText = currentInput;
+    }
+
+    function appendNumber(number) {
+        if (currentInput === '0' || shouldResetScreen) {
+            currentInput = number;
+            shouldResetScreen = false;
+        } else {
+            if (number === '.' && currentInput.includes('.')) return;
+            currentInput += number;
+        }
+        updateDisplay();
+    }
+
+    function clearDisplay() {
+        currentInput = '0';
+        previousInput = '';
+        operator = null;
+        updateDisplay();
+    }
+
+    function toggleSign() {
+        currentInput = (parseFloat(currentInput) * -1).toString();
+        updateDisplay();
+    }
+
+    function percentage() {
+        currentInput = (parseFloat(currentInput) / 100).toString();
+        updateDisplay();
+    }
+
+    function setOperator(op) {
+        if (operator !== null) calculate();
+        previousInput = currentInput;
+        operator = op;
+        shouldResetScreen = true;
+    }
+
+    function calculate() {
+        if (operator === null || shouldResetScreen) return;
+        let result;
+        const prev = parseFloat(previousInput);
+        const current = parseFloat(currentInput);
+
+        switch (operator) {
+            case '+': result = prev + current; break;
+            case '-': result = prev - current; break;
+            case '*': result = prev * current; break;
+            case '/': result = prev / current; break;
+            default: return;
+        }
+
+        currentInput = Math.round(result * 100000000) / 100000000; // Handle floating point precision
+        currentInput = currentInput.toString();
+        operator = null;
+        shouldResetScreen = true;
+        updateDisplay();
+    }
+</script>
+
+</body>
+</html>
