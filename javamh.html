@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iOS Style Calculator</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+
+      .calculator {
+        width: 320px;
+        background: #000;
+        border-radius: 40px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .display {
+        height: 120px;
+        text-align: right;
+        padding: 20px;
+        font-size: 70px;
+        color: white;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+
+      button {
+        height: 70px;
+        border-radius: 50%;
+        border: none;
+        font-size: 28px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.1s;
+      }
+
+      button:active {
+        transform: scale(0.95);
+      }
+
+      .gray {
+        background: #a6a6a6;
+        color: black;
+      }
+
+      .orange {
+        background: #ff9500;
+        color: white;
+      }
+
+      .dark {
+        background: #333333;
+        color: white;
+      }
+
+      .zero {
+        grid-column: span 2;
+        border-radius: 40px;
+        width: 100%;
+        text-align: left;
+        padding-left: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="calculator">
+      <div class="display" id="display">0</div>
+
+      <div class="buttons">
+        <button class="gray" onclick="clearDisplay()">AC</button>
+        <button class="gray" onclick="toggleSign()">+/-</button>
+        <button class="gray" onclick="percent()">%</button>
+        <button class="orange" onclick="appendOperator('/')">÷</button>
+
+        <button class="dark" onclick="appendNumber('7')">7</button>
+        <button class="dark" onclick="appendNumber('8')">8</button>
+        <button class="dark" onclick="appendNumber('9')">9</button>
+        <button class="orange" onclick="appendOperator('*')">×</button>
+
+        <button class="dark" onclick="appendNumber('4')">4</button>
+        <button class="dark" onclick="appendNumber('5')">5</button>
+        <button class="dark" onclick="appendNumber('6')">6</button>
+        <button class="orange" onclick="appendOperator('-')">−</button>
+
+        <button class="dark" onclick="appendNumber('1')">1</button>
+        <button class="dark" onclick="appendNumber('2')">2</button>
+        <button class="dark" onclick="appendNumber('3')">3</button>
+        <button class="orange" onclick="appendOperator('+')">+</button>
+
+        <button class="dark zero" onclick="appendNumber('0')">0</button>
+        <button class="dark" onclick="appendNumber('.')">.</button>
+        <button class="orange" onclick="calculate()">=</button>
+      </div>
+    </div>
+
+    <script>
+      let display = document.getElementById("display");
+      let currentInput = "0";
+      let previousInput = "";
+      let operator = null;
+      let shouldResetDisplay = false;
+
+      function updateDisplay() {
+        display.textContent = currentInput;
+      }
+
+      function appendNumber(number) {
+        if (shouldResetDisplay) {
+          currentInput = "";
+          shouldResetDisplay = false;
+        }
+        if (currentInput === "0" && number !== ".") {
+          currentInput = number;
+        } else {
+          currentInput = currentInput + number;
+        }
+        updateDisplay();
+      }
+
+      function appendOperator(op) {
+        if (operator !== null && !shouldResetDisplay) {
+          calculate();
+        }
+        previousInput = currentInput;
+        operator = op;
+        shouldResetDisplay = true;
+      }
+
+      function calculate() {
+        if (operator === null) return;
+
+        let prev = parseFloat(previousInput);
+        let current = parseFloat(currentInput);
+        let result;
+
+        switch (operator) {
+          case "+":
+            result = prev + current;
+            break;
+          case "-":
+            result = prev - current;
+            break;
+          case "*":
+            result = prev * current;
+            break;
+          case "/":
+            result = current === 0 ? "Error" : prev / current;
+            break;
+        }
+
+        currentInput = result.toString();
+        operator = null;
+        shouldResetDisplay = true;
+        updateDisplay();
+      }
+
+      function clearDisplay() {
+        currentInput = "0";
+        previousInput = "";
+        operator = null;
+        shouldResetDisplay = false;
+        updateDisplay();
+      }
+
+      function toggleSign() {
+        if (currentInput === "0") return;
+        currentInput = (parseFloat(currentInput) * -1).toString();
+        updateDisplay();
+      }
+
+      function percent() {
+        currentInput = (parseFloat(currentInput) / 100).toString();
+        updateDisplay();
+      }
+
+      // Keyboard support
+      document.addEventListener("keydown", (e) => {
+        if (e.key >= "0" && e.key <= "9") appendNumber(e.key);
+        if (e.key === ".") appendNumber(".");
+        if (e.key === "+") appendOperator("+");
+        if (e.key === "-") appendOperator("-");
+        if (e.key === "*") appendOperator("*");
+        if (e.key === "/") appendOperator("/");
+        if (e.key === "Enter" || e.key === "=") calculate();
+        if (e.key === "Backspace") clearDisplay();
+      });
+
+      updateDisplay();
+    </script>
+  </body>
+</html>
